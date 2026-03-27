@@ -1,0 +1,51 @@
+{
+  "manifest_version": 3,
+  "name": "Refocus",
+  "version": "0.1.0",
+  "description": "A calm focus assistant that detects distraction loops and gently helps you return to work.",
+  "icons": {
+    "16": "assets/icons/icon16.png",
+    "32": "assets/icons/icon32.png",
+    "48": "assets/icons/icon48.png",
+    "128": "assets/icons/icon128.png"
+  },
+  "action": {
+    "default_title": "Refocus",
+    "default_popup": "src/popup/popup.html",
+    "default_icon": {
+      "16": "assets/icons/icon16.png",
+      "32": "assets/icons/icon32.png",
+      "48": "assets/icons/icon48.png",
+      "128": "assets/icons/icon128.png"
+    }
+  },
+  "background": {
+    "service_worker": "src/background/worker.js",
+    "type": "module"
+  },
+  "options_page": "src/options/options.html",
+  "permissions": [
+    "tabs",
+    "storage",
+    "alarms",
+    "idle",
+    "scripting"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "src/content/content.js"
+      ],
+      "css": [
+        "src/content/content.css"
+      ],
+      "run_at": "document_idle"
+    }
+  ]
+}
