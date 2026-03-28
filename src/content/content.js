@@ -1,2 +1,199 @@
-// Контент-скрипт Refocus
-console.log('[Refocus] content.js подключен');
+// Refocus Content Script
+// Показывает UI-вмешательства поверх страницы и отправляет действия обратно в worker
+
+const REFOCUS_BANNER_ID = 'refocus-banner';
+
+let isActionInProgress = false;
+
+/**
+ * Найти текущий баннер
+ */
+function getBanner() {
+  return document.getElementById(REFOCUS_BANNER_ID);
+}
+
+/**
+ * Есть ли уже баннер на странице
+ */
+function hasBanner() {
+  return !!getBanner();
+}
+
+/**
+ * Удалить баннер
+ */
+function removeBanner() {
+  const existing = getBanner();
+  if (existing) {
+    existing.remove();
+  }
+
+  isActionInProgress = false;
+}
+
+/**
+ * Переключить состояние кнопок
+ */
+function setButtonsDisabled(disabled) {
+  const banner = getBanner();
+  if (!banner) return;
+
+  const buttons = banner.querySelectorAll('.refocus-banner__button');
+
+  buttons.forEach((button) => {
+    button.disabled = disabled;
+    button.setAttribute('aria-disabled', String(disabled));
+
+    if (disabled) {
+      button.classList.add('refocus-banner__button--disabled');
+    } else {
+      button.classList.remove('refocus-banner__button--disabled');
+    }
+  });
+}
+
+/**
+ * Универсальная отправка события в worker
+ */
+async function sendActionToWorker(type) {
+  if (isActionInProgress) {
+    return { success: false, reason: 'action_in_progress' };
+  }
+
+  try {
+    isActionInProgress = true;
+    setButtonsDisabled(true);
+
+    const response = await chrome.runtime.sendMessage({ type });
+
+    return response || { success: false };
+  } catch (e) {
+    console.log('[Refocus] Ошибка отправки действия в worker:', e);
+    return { success: false, error: e?.message || 'unknown_error' };
+  } finally {
+    isActionInProgress = false;
+    setButtonsDisabled(false);
+  }
+}
+
+/**
+ * Создать кнопку
+ */
+function createButton(text, onClick, className = '') {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.textContent = text;
+  button.className = `refocus-banner__button ${className}`.trim();
+
+  button.addEventListener('click', async () => {
+    if (button.disabled) return;
+    await onClick();
+  });
+
+  return button;
+}
+
+/**
+ * Показать баннер
+ */
+function showBanner({
+  title = 'Похоже, ты отвлёкся',
+  message = 'Хочешь вернуться к задаче?'
+} = {}) {
+  removeBanner();
+
+  const banner = document.createElement('div');
+  banner.id = REFOCUS_BANNER_ID;
+  banner.className = 'refocus-banner';
+
+  const content = document.createElement('div');
+  content.className = 'refocus-banner__content';
+
+  const titleEl = document.createElement('div');
+  titleEl.className = 'refocus-banner__title';
+  titleEl.textContent = title;
+
+  const messageEl = document.createElement('div');
+  messageEl.className = 'refocus-banner__message';
+  messageEl.textContent = message;
+
+  const actions = document.createElement('div');
+  actions.className = 'refocus-banner__actions';
+
+  const snoozeButton = createButton(
+    'Ещё 5 минут',
+    async () => {
+      const result = await sendActionToWorker('REFOCUS_SNOOZE_5_MINUTES');
+
+      if (result?.success) {
+        removeBanner();
+      }
+    },
+    'refocus-banner__button--secondary'
+  );
+
+  const backButton = createButton(
+    'Вернуться к задаче',
+    async () => {
+      const result = await sendActionToWorker('REFOCUS_RETURN_TO_TASK');
+
+      if (result?.success) {
+        removeBanner();
+      }
+    },
+    'refocus-banner__button--primary'
+  );
+
+  const closeButton = createButton(
+    'Закрыть',
+    async () => {
+      removeBanner();
+
+      await sendActionToWorker('REFOCUS_HIDE_BANNER');
+    },
+    'refocus-banner__button--ghost'
+  );
+
+  actions.appendChild(snoozeButton);
+  actions.appendChild(backButton);
+  actions.appendChild(closeButton);
+
+  content.appendChild(titleEl);
+  content.appendChild(messageEl);
+  content.appendChild(actions);
+  banner.appendChild(content);
+
+  document.documentElement.appendChild(banner);
+}
+
+/**
+ * Скрыть баннер по внешней команде
+ */
+function hideBanner() {
+  removeBanner();
+}
+
+/**
+ * Обработка входящих сообщений от worker
+ */
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (!message || !message.type) return;
+
+  if (message.type === 'SHOW_REFOCUS_BANNER') {
+    showBanner({
+      title: message.payload?.title,
+      message: message.payload?.message
+    });
+
+    sendResponse({ success: true });
+    return;
+  }
+
+  if (message.type === 'HIDE_REFOCUS_BANNER') {
+    hideBanner();
+    sendResponse({ success: true });
+    return;
+  }
+});
+
+console.log('[Refocus] content.js подключён');

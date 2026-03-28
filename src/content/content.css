@@ -1,1 +1,232 @@
-/* Стили контент-скрипта Refocus */
+#refocus-banner {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 2147483647;
+  width: min(420px, calc(100vw - 32px));
+  box-sizing: border-box;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+}
+
+.refocus-banner {
+  all: initial;
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 2147483647;
+  width: min(420px, calc(100vw - 32px));
+  box-sizing: border-box;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+}
+
+.refocus-banner__content {
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  padding: 20px 20px 18px;
+  border-radius: 28px;
+  overflow: hidden;
+  color: #f7fbf9;
+  isolation: isolate;
+
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.17), rgba(255, 255, 255, 0.05) 38%, rgba(255, 255, 255, 0.03)),
+    linear-gradient(180deg, rgba(14, 23, 22, 0.62), rgba(16, 27, 26, 0.54));
+  border: 1px solid rgba(255, 255, 255, 0.16);
+
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.28),
+    0 10px 28px rgba(0, 0, 0, 0.16),
+    0 1px 0 rgba(255, 255, 255, 0.08) inset,
+    0 -1px 0 rgba(255, 255, 255, 0.03) inset;
+
+  backdrop-filter: blur(28px) saturate(165%);
+  -webkit-backdrop-filter: blur(28px) saturate(165%);
+}
+
+.refocus-banner__content::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 12% 10%, rgba(255, 255, 255, 0.26), transparent 28%),
+    radial-gradient(circle at 88% 18%, rgba(116, 220, 198, 0.16), transparent 24%),
+    radial-gradient(circle at 80% 85%, rgba(92, 175, 156, 0.14), transparent 22%);
+  opacity: 0.95;
+  z-index: 0;
+}
+
+.refocus-banner__content::after {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  border-radius: 27px;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.10), rgba(255, 255, 255, 0.02) 24%, rgba(255, 255, 255, 0.015));
+  opacity: 0.9;
+  z-index: 0;
+}
+
+.refocus-banner__title,
+.refocus-banner__message,
+.refocus-banner__actions {
+  position: relative;
+  z-index: 1;
+}
+
+.refocus-banner__title {
+  margin: 0 0 10px;
+  font-size: 18px;
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: #ffffff;
+  text-wrap: balance;
+}
+
+.refocus-banner__message {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  color: rgba(247, 251, 249, 0.88);
+  max-width: 97%;
+}
+
+.refocus-banner__actions {
+  display: flex;
+  align-items: stretch;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+  flex-wrap: wrap;
+}
+
+.refocus-banner__button {
+  appearance: none;
+  -webkit-appearance: none;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  border-radius: 18px;
+  padding: 13px 17px;
+  min-height: 46px;
+  font-size: 13px;
+  line-height: 1.1;
+  font-weight: 650;
+  font-family: inherit;
+  letter-spacing: -0.015em;
+  box-sizing: border-box;
+  transition:
+    transform 0.18s ease,
+    opacity 0.18s ease,
+    background-color 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease,
+    box-shadow 0.18s ease,
+    filter 0.18s ease;
+  white-space: nowrap;
+}
+
+.refocus-banner__button:hover {
+  transform: translateY(-1px);
+}
+
+.refocus-banner__button:active {
+  transform: translateY(0);
+}
+
+.refocus-banner__button--secondary {
+  color: rgba(250, 252, 251, 0.96);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.10), rgba(255, 255, 255, 0.045));
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.refocus-banner__button--secondary:hover {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.125), rgba(255, 255, 255, 0.06));
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+.refocus-banner__button--primary {
+  color: #ffffff;
+  background:
+    linear-gradient(180deg, rgba(108, 214, 191, 0.98), rgba(77, 172, 151, 0.98));
+  border: 1px solid rgba(150, 237, 217, 0.34);
+  box-shadow:
+    0 14px 30px rgba(69, 155, 136, 0.30),
+    0 6px 16px rgba(69, 155, 136, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.20);
+}
+
+.refocus-banner__button--primary:hover {
+  filter: brightness(1.03);
+  box-shadow:
+    0 18px 36px rgba(69, 155, 136, 0.34),
+    0 8px 18px rgba(69, 155, 136, 0.20),
+    inset 0 1px 0 rgba(255, 255, 255, 0.24);
+}
+
+.refocus-banner__button--ghost {
+  color: rgba(255, 255, 255, 0.94);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.07));
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.09),
+    0 6px 16px rgba(0, 0, 0, 0.07);
+}
+
+.refocus-banner__button--ghost:hover {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.20), rgba(255, 255, 255, 0.09));
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.refocus-banner__button--disabled,
+.refocus-banner__button:disabled {
+  cursor: not-allowed;
+  opacity: 0.52;
+  transform: none !important;
+  box-shadow: none !important;
+  filter: none !important;
+}
+
+@media (max-width: 640px) {
+  #refocus-banner,
+  .refocus-banner {
+    top: 12px;
+    right: 12px;
+    width: calc(100vw - 24px);
+  }
+
+  .refocus-banner__content {
+    border-radius: 24px;
+    padding: 18px 16px 16px;
+  }
+
+  .refocus-banner__title {
+    font-size: 17px;
+  }
+
+  .refocus-banner__message {
+    font-size: 13px;
+  }
+
+  .refocus-banner__actions {
+    gap: 8px;
+  }
+
+  .refocus-banner__button {
+    flex: 1 1 auto;
+    min-width: 0;
+    white-space: normal;
+  }
+}

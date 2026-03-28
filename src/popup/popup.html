@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Refocus</title>
+  <link rel="stylesheet" href="./popup.css" />
+</head>
+<body>
+  <div class="popup">
+    <div class="popup__glass">
+      <div class="popup__header">
+        <div>
+          <div class="popup__eyebrow">Refocus</div>
+          <h1 class="popup__title">Фокус в браузере</h1>
+        </div>
+        <div class="popup__status" id="focusStatus">Активно</div>
+      </div>
+
+      <div class="popup__card">
+        <div class="popup__label">Текущий сайт</div>
+        <div class="popup__domain" id="currentDomain">—</div>
+      </div>
+
+      <div class="popup__card">
+        <div class="popup__label">Сегодня на сайте</div>
+        <div class="popup__value" id="currentDomainTime">0 мин</div>
+      </div>
+
+      <div class="popup__actions">
+        <button class="popup__button popup__button--secondary" id="snooze5Btn">
+          Ещё 5 минут
+        </button>
+        <button class="popup__button popup__button--primary" id="openOptionsBtn">
+          Настройки
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="./popup.js"></script>
+</body>
+</html>
