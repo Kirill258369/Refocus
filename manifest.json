@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Refocus",
+  "name": "Refocus — контроль времени в браузере",
   "version": "0.1.0",
-  "description": "A calm focus assistant that detects distraction loops and gently helps you return to work.",
+  "description": "Помогает не залипать: отслеживает время на сайтах и мягко возвращает к задачам.",
   "icons": {
     "16": "assets/icons/icon16.png",
     "32": "assets/icons/icon32.png",
