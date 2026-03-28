@@ -2,6 +2,7 @@
 // Показывает UI-вмешательства поверх страницы и отправляет действия обратно в worker
 
 const REFOCUS_BANNER_ID = 'refocus-banner';
+const REFOCUS_OVERLAY_ID = 'refocus-overlay';
 
 let isActionInProgress = false;
 
@@ -13,10 +14,52 @@ function getBanner() {
 }
 
 /**
+ * Найти overlay
+ */
+function getOverlay() {
+  return document.getElementById(REFOCUS_OVERLAY_ID);
+}
+
+/**
  * Есть ли уже баннер на странице
  */
 function hasBanner() {
   return !!getBanner();
+}
+
+/**
+ * Удалить overlay
+ */
+function removeOverlay() {
+  const existing = getOverlay();
+  if (existing) {
+    existing.remove();
+  }
+}
+
+/**
+ * Создать overlay
+ */
+function showOverlay(level = 1) {
+  removeOverlay();
+
+  if (level < 3) {
+    return;
+  }
+
+  const overlay = document.createElement('div');
+  overlay.id = REFOCUS_OVERLAY_ID;
+
+  overlay.style.position = 'fixed';
+  overlay.style.inset = '0';
+  overlay.style.zIndex = '2147483646';
+  overlay.style.pointerEvents = 'none';
+  overlay.style.background = 'rgba(5, 10, 10, 0.22)';
+  overlay.style.backdropFilter = 'blur(2px)';
+  overlay.style.webkitBackdropFilter = 'blur(2px)';
+  overlay.style.transition = 'opacity 0.18s ease';
+
+  document.documentElement.appendChild(overlay);
 }
 
 /**
@@ -28,6 +71,7 @@ function removeBanner() {
     existing.remove();
   }
 
+  removeOverlay();
   isActionInProgress = false;
 }
 
@@ -94,13 +138,30 @@ function createButton(text, onClick, className = '') {
 }
 
 /**
+ * Применить визуальный уровень баннера
+ */
+function applyBannerLevel(banner, level) {
+  banner.dataset.level = String(level || 1);
+
+  if (level >= 2) {
+    banner.style.transform = 'translateY(0)';
+  }
+
+  if (level >= 3) {
+    banner.style.boxShadow = '0 18px 42px rgba(0,0,0,0.22)';
+  }
+}
+
+/**
  * Показать баннер
  */
 function showBanner({
   title = 'Похоже, ты отвлёкся',
-  message = 'Хочешь вернуться к задаче?'
+  message = 'Хочешь вернуться к задаче?',
+  level = 1
 } = {}) {
   removeBanner();
+  showOverlay(level);
 
   const banner = document.createElement('div');
   banner.id = REFOCUS_BANNER_ID;
@@ -148,7 +209,6 @@ function showBanner({
     'Закрыть',
     async () => {
       removeBanner();
-
       await sendActionToWorker('REFOCUS_HIDE_BANNER');
     },
     'refocus-banner__button--ghost'
@@ -163,6 +223,7 @@ function showBanner({
   content.appendChild(actions);
   banner.appendChild(content);
 
+  applyBannerLevel(banner, level);
   document.documentElement.appendChild(banner);
 }
 
@@ -182,7 +243,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'SHOW_REFOCUS_BANNER') {
     showBanner({
       title: message.payload?.title,
-      message: message.payload?.message
+      message: message.payload?.message,
+      level: message.payload?.level || 1
     });
 
     sendResponse({ success: true });

@@ -14,7 +14,7 @@
           <div class="popup__eyebrow">Refocus</div>
           <h1 class="popup__title">Фокус в браузере</h1>
         </div>
-        <div class="popup__status" id="focusStatus">Активно</div>
+        <div class="popup__status" id="focusStatus">Загрузка...</div>
       </div>
 
       <div class="popup__card">
@@ -22,9 +22,47 @@
         <div class="popup__domain" id="currentDomain">—</div>
       </div>
 
-      <div class="popup__card">
-        <div class="popup__label">Сегодня на сайте</div>
-        <div class="popup__value" id="currentDomainTime">0 мин</div>
+      <div class="popup__periods">
+        <button class="popup__period-button popup__period-button--active" data-period="day">
+          День
+        </button>
+        <button class="popup__period-button" data-period="week">
+          7 дней
+        </button>
+        <button class="popup__period-button" data-period="month">
+          30 дней
+        </button>
+      </div>
+
+      <div class="popup__grid">
+        <div class="popup__card popup__card--compact">
+          <div class="popup__label">На текущем сайте</div>
+          <div class="popup__value" id="currentDomainTime">0 мин</div>
+        </div>
+
+        <div class="popup__card popup__card--compact">
+          <div class="popup__label">Отвлечения</div>
+          <div class="popup__value" id="totalDistractingTime">0 мин</div>
+        </div>
+
+        <div class="popup__card popup__card--compact popup__card--full">
+          <div class="popup__label">Вмешательства Refocus</div>
+          <div class="popup__value" id="interventionsCount">0</div>
+        </div>
+      </div>
+
+      <div class="popup__card popup__card--focus">
+        <div class="popup__focus-row">
+          <div>
+            <div class="popup__label">Режим фокуса</div>
+            <div class="popup__focus-text" id="focusModeText">Выключен</div>
+          </div>
+
+          <label class="popup__switch">
+            <input type="checkbox" id="focusModeToggle" />
+            <span class="popup__switch-slider"></span>
+          </label>
+        </div>
       </div>
 
       <div class="popup__actions">
@@ -35,6 +73,36 @@
           Настройки
         </button>
       </div>
+      <div class="popup__card popup__card--developer">
+  <div class="popup__label">Разработчик</div>
+
+  <div class="popup__developer">
+    <div class="popup__developer-info">
+      <div class="popup__developer-name">Белов Кирилл</div>
+      <a href="https://kbelov.uz" target="_blank" class="popup__developer-link">
+        kbelov.uz
+      </a>
+    </div>
+
+    <div class="popup__developer-actions">
+      <a
+        href="https://boosty.to/belov_dev/donate"
+        target="_blank"
+        class="popup__developer-btn popup__developer-btn--primary"
+      >
+        Поддержать
+      </a>
+
+      <a
+        href="https://t.me/alexbeliy258"
+        target="_blank"
+        class="popup__developer-btn popup__developer-btn--secondary"
+      >
+        Связаться
+      </a>
+    </div>
+  </div>
+</div>
     </div>
   </div>
 

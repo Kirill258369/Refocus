@@ -7,7 +7,7 @@ let sessionStart = null;
 
 let snoozeUntil = 0;
 let lastBannerShownAt = 0;
-
+let focusModeEnabled = false;
 let lastWorkTabId = null;
 let lastWorkWindowId = null;
 let lastWorkDomain = null;
@@ -15,7 +15,7 @@ let lastWorkUpdatedAt = 0;
 
 const BANNER_COOLDOWN_MS = 30 * 1000;
 
-const DISTRACTING_DOMAINS = [
+const DEFAULT_DISTRACTING_DOMAINS = [
   'youtube.com',
   'twitter.com',
   'x.com',
@@ -26,11 +26,20 @@ const DISTRACTING_DOMAINS = [
   'web.telegram.org'
 ];
 
+let distractingDomains = [...DEFAULT_DISTRACTING_DOMAINS];
+let allowlistDomains = [];
 /**
  * Проверка: домен относится к отвлекающим сайтам
  */
 function isDistractingDomain(domain) {
-  return DISTRACTING_DOMAINS.some((item) => domain.includes(item));
+  if (!domain) return false;
+
+  const isAllowlisted = allowlistDomains.some((item) => domain.includes(item));
+  if (isAllowlisted) {
+    return false;
+  }
+
+  return distractingDomains.some((item) => domain.includes(item));
 }
 
 /**
@@ -60,6 +69,77 @@ function getTodayKey() {
   return new Date().toISOString().split('T')[0];
 }
 
+async function incrementInterventionCount() {
+  try {
+    const dayKey = getTodayKey();
+
+    const result = await chrome.storage.local.get(['interventionStats']);
+    const interventionStats =
+      result.interventionStats && typeof result.interventionStats === 'object'
+        ? result.interventionStats
+        : {};
+
+    if (typeof interventionStats[dayKey] !== 'number') {
+      interventionStats[dayKey] = 0;
+    }
+
+    interventionStats[dayKey] += 1;
+
+    await chrome.storage.local.set({ interventionStats });
+
+    console.log('[Refocus] Вмешательства за день:', {
+      day: dayKey,
+      count: interventionStats[dayKey]
+    });
+  } catch (e) {
+    console.log('[Refocus] Ошибка подсчёта вмешательств:', e);
+  }
+}
+
+async function loadSettings() {
+  try {
+    const result = await chrome.storage.local.get(['settings']);
+    const settings = result.settings || {};
+
+    if (
+      Array.isArray(settings.distractingDomains) &&
+      settings.distractingDomains.length
+    ) {
+      distractingDomains = settings.distractingDomains;
+    } else {
+      distractingDomains = [...DEFAULT_DISTRACTING_DOMAINS];
+    }
+
+    if (Array.isArray(settings.allowlistDomains)) {
+      allowlistDomains = settings.allowlistDomains;
+    } else {
+      allowlistDomains = [];
+    }
+
+    console.log('[Refocus] Настройки загружены:', {
+      distractingDomains,
+      allowlistDomains
+    });
+  } catch (e) {
+    console.log('[Refocus] Ошибка загрузки настроек:', e);
+    distractingDomains = [...DEFAULT_DISTRACTING_DOMAINS];
+    allowlistDomains = [];
+  }
+}
+async function loadFocusMode() {
+  try {
+    const result = await chrome.storage.local.get(['focusModeEnabled']);
+    focusModeEnabled = !!result.focusModeEnabled;
+
+    console.log(
+      '[Refocus] Focus Mode:',
+      focusModeEnabled ? 'включён' : 'выключен'
+    );
+  } catch (e) {
+    console.log('[Refocus] Ошибка загрузки Focus Mode:', e);
+    focusModeEnabled = false;
+  }
+}
 /**
  * Запомнить рабочую вкладку
  */
@@ -144,6 +224,7 @@ function analyzeDomain(dayStats, domain) {
 function buildBannerPayload(analysis) {
   let title = 'Похоже, ты отвлёкся';
   let message = `Ты уже провёл здесь ${analysis.totalMinutes} мин. Хочешь вернуться к задаче?`;
+  let level = analysis.level || 1;
 
   if (analysis.level === 1) {
     title = 'Немного отвлёкся?';
@@ -158,9 +239,14 @@ function buildBannerPayload(analysis) {
   if (analysis.level >= 3) {
     title = 'Похоже, ты залип';
     message = `Ты уже провёл здесь ${analysis.totalMinutes} мин. Давай мягко вернёмся к задаче.`;
+    level = 3;
   }
 
-  return { title, message };
+  return {
+    title,
+    message,
+    level
+  };
 }
 
 /**
@@ -265,26 +351,40 @@ async function saveSession(domain, startTime, endTime, sourceTabId) {
 
     const now = Date.now();
 
-    if (now < snoozeUntil) {
-      console.log('[Refocus] Snooze активен — баннер не показываем');
-      return;
-    }
+if (now < snoozeUntil) {
+  console.log('[Refocus] Snooze активен — баннер не показываем');
+  return;
+}
 
-    if (now - lastBannerShownAt < BANNER_COOLDOWN_MS) {
-      console.log('[Refocus] Cooldown баннера активен — повторно не показываем');
-      return;
-    }
+const minMinutesBeforeBanner = focusModeEnabled ? 0.5 : 1;
 
-    const shown = await sendRefocusBanner(analysis, sourceTabId);
+if (analysis.totalMinutes < minMinutesBeforeBanner) {
+  console.log('[Refocus] Слишком рано для баннера');
+  return;
+}
 
-    if (shown) {
-      lastBannerShownAt = now;
+if (now - lastBannerShownAt < BANNER_COOLDOWN_MS) {
+  console.log('[Refocus] Cooldown баннера активен — повторно не показываем');
+  return;
+}
+
+const effectiveAnalysis = focusModeEnabled
+  ? {
+      ...analysis,
+      level: Math.min(3, analysis.level + 1)
     }
+  : analysis;
+
+const shown = await sendRefocusBanner(effectiveAnalysis, sourceTabId);
+
+if (shown) {
+  lastBannerShownAt = now;
+  await incrementInterventionCount();
+}
   } catch (e) {
     console.log('[Refocus] Ошибка в saveSession:', e);
   }
 }
-
 /**
  * Завершить текущую сессию
  */
@@ -441,11 +541,15 @@ chrome.windows.onFocusChanged.addListener(async (windowId) => {
 /**
  * События расширения
  */
-chrome.runtime.onInstalled.addListener(() => {
+chrome.runtime.onInstalled.addListener(async () => {
+  await loadSettings();
+  await loadFocusMode();
   console.log('[Refocus] Установлено');
 });
 
-chrome.runtime.onStartup.addListener(() => {
+chrome.runtime.onStartup.addListener(async () => {
+  await loadSettings();
+  await loadFocusMode();
   console.log('[Refocus] Запущено');
 });
 
@@ -465,22 +569,37 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 
   if (message.type === 'REFOCUS_RETURN_TO_TASK') {
-  const senderTabId = sender?.tab?.id || null;
+    const senderTabId = sender?.tab?.id || null;
 
-  returnToLastWorkTab(senderTabId)
-    .then((success) => {
-      console.log('[Refocus] Пользователь решил вернуться к задаче');
-      sendResponse({ success });
-    })
-    .catch((e) => {
-      console.log('[Refocus] Ошибка возврата к задаче:', e);
-      sendResponse({ success: false });
-    });
+    returnToLastWorkTab(senderTabId)
+      .then((success) => {
+        console.log('[Refocus] Пользователь решил вернуться к задаче');
+        sendResponse({ success });
+      })
+      .catch((e) => {
+        console.log('[Refocus] Ошибка возврата к задаче:', e);
+        sendResponse({ success: false });
+      });
 
-  return true;
-}
+    return true;
+  }
 
   if (message.type === 'REFOCUS_HIDE_BANNER') {
     sendResponse({ success: true });
   }
 });
+
+chrome.storage.onChanged.addListener((changes, areaName) => {
+  if (areaName !== 'local') return;
+
+  if (changes.settings) {
+    loadSettings();
+  }
+
+  if (changes.focusModeEnabled) {
+    loadFocusMode();
+  }
+});
+
+loadSettings();
+loadFocusMode();

@@ -2,10 +2,109 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Refocus — Настройки</title>
+  <link rel="stylesheet" href="./options.css" />
 </head>
 <body>
-  <h1>Настройки Refocus</h1>
-  <p>Страница настроек пока в разработке.</p>
+  <div class="settings-page">
+    <div class="settings-shell">
+      <div class="settings-header">
+        <div>
+          <div class="settings-eyebrow">Refocus</div>
+          <h1 class="settings-title">Настройки фокуса</h1>
+          <p class="settings-subtitle">
+            Управляй списком отвлекающих сайтов, которые Refocus отслеживает и использует для мягких вмешательств.
+          </p>
+        </div>
+
+        <div class="settings-badge" id="saveStatus">Не сохранено</div>
+      </div>
+
+      <div class="settings-card">
+        <div class="settings-card__header">
+          <h2 class="settings-card__title">Отвлекающие сайты</h2>
+          <p class="settings-card__text">
+            Укажи по одному домену на строку. Например:
+            <span class="mono">youtube.com</span>,
+            <span class="mono">web.telegram.org</span>,
+            <span class="mono">x.com</span>
+          </p>
+        </div>
+
+        <textarea
+          id="domainsTextarea"
+          class="settings-textarea"
+          spellcheck="false"
+          placeholder="youtube.com&#10;web.telegram.org&#10;x.com"
+        ></textarea>
+      </div>
+
+      <div class="settings-card">
+        <div class="settings-card__header">
+          <h2 class="settings-card__title">Разрешённые сайты</h2>
+          <p class="settings-card__text">
+            Эти домены Refocus не будет считать отвлекающими, даже если они похожи на развлекательные.
+            Указывай по одному домену на строку. Например:
+            <span class="mono">youtube.com</span>,
+            <span class="mono">reddit.com</span>
+          </p>
+        </div>
+
+        <textarea
+          id="allowlistTextarea"
+          class="settings-textarea"
+          spellcheck="false"
+          placeholder="youtube.com&#10;reddit.com"
+        ></textarea>
+      </div>
+
+      <div class="settings-card">
+        <div class="settings-actions">
+          <button class="settings-button settings-button--secondary" id="resetDefaultsBtn">
+            Сбросить по умолчанию
+          </button>
+          <button class="settings-button settings-button--primary" id="saveBtn">
+            Сохранить изменения
+          </button>
+        </div>
+      </div>
+
+      <div class="settings-card settings-card--developer">
+  <div class="settings-card__header">
+    <h2 class="settings-card__title">Разработчик</h2>
+  </div>
+
+  <div class="developer-block">
+    <div class="developer-info">
+      <div class="developer-name">Белов Кирилл</div>
+      <a href="https://kbelov.uz" target="_blank" class="developer-link">
+        kbelov.uz
+      </a>
+    </div>
+
+    <div class="developer-actions">
+      <a
+        href="https://boosty.to/belov_dev/donate"
+        target="_blank"
+        class="developer-button developer-button--primary"
+      >
+        Поддержать проект
+      </a>
+
+      <a
+        href="https://t.me/alexbeliy258"
+        target="_blank"
+        class="developer-button developer-button--secondary"
+      >
+        Связаться
+      </a>
+    </div>
+  </div>
+</div>
+    </div>
+  </div>
+
+  <script src="./options.js"></script>
 </body>
 </html>
