@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Refocus — контроль времени в браузере",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Помогает не залипать: отслеживает время на сайтах и мягко возвращает к задачам.",
   "icons": {
     "16": "assets/icons/icon16.png",
@@ -26,9 +26,7 @@
   "options_page": "src/options/options.html",
   "permissions": [
     "tabs",
-    "storage",
-    "alarms",
-    "idle"
+    "storage"
   ],
   "host_permissions": [
     "<all_urls>"
